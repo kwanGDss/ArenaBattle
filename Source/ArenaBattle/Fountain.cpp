@@ -23,12 +23,28 @@ AFountain::AFountain()
 	Light->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f));
 	Splash->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh>
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
 		SM_Body(TEXT("/Game/InfinityBladeGrassLands/Environments/Plains/Env_Plains_Ruins/StaticMesh/SM_Plains_Castle_Fountain_01.SM_Plains_Castle_Fountain_01"));
 
 	if(SM_Body.Succeeded())
 	{
 		Body->SetStaticMesh(SM_Body.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		SM_Water(TEXT("/Game/InfinityBladeGrassLands/Effects/FX_Meshes/Env/SM_Plains_Fountain_02.SM_Plains_Fountain_02"));
+
+	if(SM_Water.Succeeded())
+	{
+		Water->SetStaticMesh(SM_Water.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SM_Splash(TEXT("/Game/InfinityBladeGrassLands/Effects/FX_Ambient/Water/P_Water_Fountain_Splash_Base_01.P_Water_Fountain_Splash_Base_01"));
+
+	if(SM_Splash.Succeeded())
+	{
+		Splash->SetTemplate(SM_Splash.Object);
 	}
 }
 
@@ -37,6 +53,7 @@ void AFountain::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UE_LOG(LogArenaBattle, Warning, TEXT("Actor Name : %s, ID : %d, Location X : %.3f"), *GetName(), ID, GetActorLocation().X);
 }
 
 // Called every frame
