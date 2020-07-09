@@ -12,5 +12,5 @@ void AABPlayerController::PostInitializeComponents()
 void AABPlayerController::OnPossess(APawn* InPawn) 
 {
 	ABLOG_S(Warning);
-	Super::Possess(InPawn);
+	Super::OnPossess(InPawn);
 }
