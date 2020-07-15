@@ -100,17 +100,12 @@ void AABCharacter::Tick(float DeltaTime)
 	{
 	case EControlMode::DIABLO:
 		SpringArm->GetRelativeRotation() = FMath::RInterpTo(SpringArm->GetRelativeRotation(), ArmRotationTo, DeltaTime, ArmRotationSpeed);
-	}
-
-	switch (CurrentControlMode)
-	{
-	case EControlMode::DIABLO:
+		
 		if (DirectionToMove.SizeSquared() > 0.0f)
 		{
 			GetController()->SetControlRotation(FRotationMatrix::MakeFromX(DirectionToMove).Rotator());
 			AddMovementInput(DirectionToMove);
 		}
-		break;
 	default:
 		break;
 	}
@@ -119,10 +114,11 @@ void AABCharacter::Tick(float DeltaTime)
 void AABCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-	ABCHECK(nullptr != AnimInstance);
 
-	AnimInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+	ABAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	ABCHECK(nullptr != ABAnim);
+
+	ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
 }
 
 // Called to bind functionality to input
@@ -173,6 +169,8 @@ void AABCharacter::LookUp(float NewAxisValue)
 	case EControlMode::GTA:
 		AddControllerPitchInput(NewAxisValue);
 		break;
+	default:
+		break;
 	}
 }
 
@@ -182,6 +180,8 @@ void AABCharacter::Turn(float NewAxisValue)
 	{
 	case EControlMode::GTA:
 		AddControllerYawInput(NewAxisValue);
+		break;
+	default:
 		break;
 	}
 }
@@ -203,10 +203,9 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
-	auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-	if (nullptr == AnimInstance) return;
+	if(IsAttacking) return;
 
-	AnimInstance->PlayAttackMontage();
+	ABAnim->PlayAttackMontage();
 	IsAttacking = true;
 }
 
