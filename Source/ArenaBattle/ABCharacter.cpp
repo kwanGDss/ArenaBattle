@@ -3,6 +3,7 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
+#include "ABWeapon.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -37,6 +38,19 @@ AABCharacter::AABCharacter()
 		GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
 	}
 
+	//FName WeaponSocket(TEXT("hand_rSocket"));
+	//if(GetMesh()->DoesSocketExist(WeaponSocket))
+	//{
+	//	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
+	//	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
+	//		SK_WEAPON(TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Silly_Weapons/Blade_Sucker/SK_Blade_Sucker.SK_Blade_Sucker"));
+	//	if(SK_WEAPON.Succeeded())
+	//	{
+	//		Weapon->SetSkeletalMesh(SK_WEAPON.Object);
+	//	}
+	//	Weapon->SetupAttachment(GetMesh(), WeaponSocket);
+	//}
+	
 	SetControlMode(EControlMode::GTA);
 
 	ArmLengthSpeed = 3.0f;
@@ -57,6 +71,12 @@ void AABCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FName WeaponSocket(TEXT("hand_rSocket"));
+	auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
+	if(nullptr != CurWeapon)
+	{
+		CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+	}
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
@@ -149,6 +169,12 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
+	if(FinalDamage > 0.0f)
+	{
+		ABAnim->SetDeadAnim();
+		SetActorEnableCollision(false);
+	}
+	
 	return FinalDamage;
 }
 
