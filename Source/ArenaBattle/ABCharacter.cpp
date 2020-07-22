@@ -50,7 +50,7 @@ AABCharacter::AABCharacter()
 	//	}
 	//	Weapon->SetupAttachment(GetMesh(), WeaponSocket);
 	//}
-	
+
 	SetControlMode(EControlMode::GTA);
 
 	ArmLengthSpeed = 3.0f;
@@ -73,7 +73,7 @@ void AABCharacter::BeginPlay()
 
 	FName WeaponSocket(TEXT("hand_rSocket"));
 	auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
-	if(nullptr != CurWeapon)
+	if (nullptr != CurWeapon)
 	{
 		CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
 	}
@@ -169,12 +169,12 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
-	if(FinalDamage > 0.0f)
+	if (FinalDamage > 0.0f)
 	{
 		ABAnim->SetDeadAnim();
 		SetActorEnableCollision(false);
 	}
-	
+
 	return FinalDamage;
 }
 
@@ -191,6 +191,24 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AABCharacter::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AABCharacter::Turn);
+}
+
+bool AABCharacter::CanSetWeapon()
+{
+	return (nullptr == CurrentWeapon);
+}
+
+void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
+{
+	ABCHECK(nullptr != NewWeapon && nullptr == CurrentWeapon);
+
+	FName WeaponSocket(TEXT("hand_rSocket"));
+	if(nullptr != NewWeapon)
+	{
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+		NewWeapon->SetOwner(this);
+		CurrentWeapon = NewWeapon;
+	}
 }
 
 void AABCharacter::UpDown(float NewAxisValue)
@@ -333,7 +351,7 @@ void AABCharacter::AttackCheck()
 		DebugLifeTime);
 
 #endif
-	
+
 	if (bResult)
 	{
 		if (HitResult.Actor.IsValid())
