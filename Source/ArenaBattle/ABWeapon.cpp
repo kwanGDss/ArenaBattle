@@ -20,6 +20,8 @@ AABWeapon::AABWeapon()
 	}
 	Weapon->SetCollisionProfileName(TEXT("NoCollision"));
 
+	ABLOG_S(Warning);
+
 }
 
 // Called when the game starts or when spawned

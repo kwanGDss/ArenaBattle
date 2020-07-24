@@ -4,6 +4,7 @@
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
 #include "ABWeapon.h"
+#include "ABCharacterStatComponent.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -14,6 +15,7 @@ AABCharacter::AABCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	Camera->SetupAttachment(SpringArm);
@@ -70,13 +72,6 @@ AABCharacter::AABCharacter()
 void AABCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FName WeaponSocket(TEXT("hand_rSocket"));
-	auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
-	if (nullptr != CurWeapon)
-	{
-		CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
-	}
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
@@ -216,7 +211,7 @@ void AABCharacter::UpDown(float NewAxisValue)
 	switch (CurrentControlMode)
 	{
 	case EControlMode::GTA:
-		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
+		AddMovementInput(FRotationMatrix(FRotator(0.0f, GetControlRotation().Yaw, 0.0f)).GetUnitAxis(EAxis::X), NewAxisValue);
 		break;
 	case EControlMode::DIABLO:
 		DirectionToMove.X = NewAxisValue;
@@ -229,7 +224,7 @@ void AABCharacter::LeftRight(float NewAxisValue)
 	switch (CurrentControlMode)
 	{
 	case EControlMode::GTA:
-		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
+		AddMovementInput(FRotationMatrix(FRotator(0.0f, GetControlRotation().Yaw, 0.0f)).GetUnitAxis(EAxis::Y), NewAxisValue);
 		break;
 	case EControlMode::DIABLO:
 		DirectionToMove.Y = NewAxisValue;
