@@ -9,7 +9,7 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
 
 	Level = 1;
@@ -22,7 +22,7 @@ void UABCharacterStatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+
 }
 
 void UABCharacterStatComponent::InitializeComponent()
@@ -37,14 +37,43 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 
 	ABCHECK(nullptr != ABGameInstance);
 	CurrentStatData = ABGameInstance->GetABCharacterData(NewLevel);
-	if(nullptr != CurrentStatData)
+	if (nullptr != CurrentStatData)
 	{
 		Level = NewLevel;
-		CurrentHP = CurrentStatData->MaxHp;
+		SetHP(CurrentStatData->MaxHp);
 	}
 	else
 	{
 		ABLOG(Error, TEXT("Level (%d) data doesn't exist"), NewLevel);
 	}
+}
+
+void UABCharacterStatComponent::SetDamage(float NewDamage)
+{
+	ABCHECK(nullptr != CurrentStatData);
+	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHp));
+}
+
+void UABCharacterStatComponent::SetHP(float NewHP)
+{
+	CurrentHP = NewHP;
+	OnHPChanged.Broadcast();
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		CurrentHP = 0.0f;
+		OnHPIsZero.Broadcast();
+	}
+}
+
+float UABCharacterStatComponent::GetAttack()
+{
+	ABCHECK(nullptr != CurrentStatData, 0.0f);
+	return CurrentStatData->Attack;
+}
+
+float UABCharacterStatComponent::GetHPRatio()
+{
+	ABCHECK(nullptr != CurrentStatData, 0.0f);
+	return (CurrentStatData->MaxHp < KINDA_SMALL_NUMBER) ? 0.0f : (CurrentHP / CurrentStatData->MaxHp);
 }
 
